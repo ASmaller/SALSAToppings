@@ -2,14 +2,21 @@ import os
 
 distance = 20   #MINIMUM DISTANCE BETWEEN PEAKS
 threshold = 50  #THRESHOLD FOR PEAK
+peakLeniency = 10 #MAX DISTANCE BETWEEN NEIGHBOURINNG PEAKS TO COUNT AS THE SAME PEAK
+
+x1Peaks = []
+x2Peaks = []
+x3Peaks = []
 
 variableFile = open('variables.txt')
 variables = variableFile.readlines()
 distance = int(variables[1][11:-1])
 threshold = int(variables[3][12:])
 variableFile.close()
-
-print(distance, threshold)
+print(" - - - - - - - - - ")
+print(" - SALSAToppings - ")
+print(" - - - - - - - - - ")
+print("Distance: ", distance, "\nThreshold: ",  threshold, "\nPeak Leniency: ",  peakLeniency, "\n")
 
 outputFileDetailed = open('data/output/outputDataDetailed.txt','a')
 outputFileDetailed = open('data/output/outputDataDetailed.txt', 'r+')
@@ -21,6 +28,7 @@ outputFileTSV = open('data/output/outputDataTSV.txt', 'r+')
 outputFileTSV.truncate(0)
 outputFileTSV.writelines(str('GLong' + '\t' + 'x1' + '\t' + 'x2' + '\t' + 'x3' + '\n'))
 
+print("Sorted", len(sorted(os.listdir('data\input'))), "spectrum files:")
 print(sorted(os.listdir('data\input')))
 
 for filename in sorted(os.listdir('data\input')):
@@ -97,6 +105,7 @@ for filename in sorted(os.listdir('data\input')):
         #print('x1:', x1, 'y1:', y1)
         linesToWriteDetailed.append('x1:' + str(x1*1000) + ', y1:' + str(y1) + '\n')
         line = str(str(content[4][7:20]) + '\t' + str(x1*1000) + '\n')
+        x1Peaks.append(x1)
       else:
         #print('No peaks found!')
         linesToWriteDetailed.append
@@ -104,19 +113,24 @@ for filename in sorted(os.listdir('data\input')):
         #print('x2:', x2, 'y2:', y2)
         linesToWriteDetailed.append('x2:' + str(x2*1000) + ', y2:' + str(y2) + '\n')
         line = str(str(content[4][7:20]) + '\t' + str(x1*1000) + '\t' + str(x2*1000) + '\n')
+        x2Peaks.append(x2)
       if 'x3' in locals():
         #print('x3:', x3, 'y3:', y3) 
         linesToWriteDetailed.append('x3:' + str(x3*1000) + ', y3:' + str(y3) + '\n')
         line = str(str(content[4][7:20]) + '\t' + str(x1*1000) + '\t' + str(x2*1000) + '\t' + str(x3*1000) + '\n')
+        x3Peaks.append(x3)
+      if 'x2' not in locals():
+        x2Peaks.append("")
+      if 'x3' not in locals():
+        x3Peaks.append("")
       linesToWriteTSV.append(line)
-      #####
     
     if 'x1' in locals():
       del x1
     if 'x2' in locals():
       del x2
     if 'x3' in locals():
-      del x3        
+      del x3
 
     linesToWriteDetailed = [period.replace('.', ',') for period in linesToWriteDetailed]
     linesToWriteTSV = [period.replace('.', ',') for period in linesToWriteTSV]
@@ -124,5 +138,103 @@ for filename in sorted(os.listdir('data\input')):
     outputFileDetailed.writelines(linesToWriteDetailed)
     outputFileTSV.writelines(linesToWriteTSV)
     f.close()
+    
+
+
+
+
+#SORT ATTEMPT
+for x in range(0, len(sorted(os.listdir('data\input'))), 1):
+  if x > 0:
+    if round(x1Peaks[x]) in range(round(x1Peaks[x-1])-peakLeniency, round(x1Peaks[x-1])+peakLeniency):
+      print(" - - - - - ")
+      print("x1Peak:", x,"| Similiar peak in x1\n")
+      try:
+        print(x1Peaks[x], " ∼ ", round(x1Peaks[x]))
+      except:
+        print("NaN")
+      try:
+        print(x1Peaks[x-1], " ∼ ", round(x1Peaks[x-1]))
+      except:
+        print("NaN")
+      try:
+        print(x2Peaks[x-1], " ∼ ", round(x2Peaks[x-1]))
+      except:
+        print("NaN")
+      try:
+        print(x3Peaks[x-1], " ∼ ", round(x3Peaks[x-1]))
+      except:
+        print("NaN")
+      finally:
+        print(" - - - - - \n")
+    elif not issubclass(type(x2Peaks[x-1]), str) and round(x1Peaks[x]) in range(round(x2Peaks[x-1])-peakLeniency, round(x2Peaks[x-1])+peakLeniency):
+      print(" - - - - - ")
+      print("x1Peak:", x,"| Similiar peak in x2\n")
+      try:
+        print(x1Peaks[x], " ∼ ", round(x1Peaks[x]))
+      except:
+        print("NaN")
+      try:
+        print(x1Peaks[x-1], " ∼ ", round(x1Peaks[x-1]))
+      except:
+        print("NaN")
+      try:
+        print(x2Peaks[x-1], " ∼ ", round(x2Peaks[x-1]))
+      except:
+        print("NaN")
+      try:
+        print(x3Peaks[x-1], " ∼ ", round(x3Peaks[x-1]))
+      except:
+        print("NaN")
+      finally:
+        print(" - - - - - \n")
+    elif not issubclass(type(x3Peaks[x-1]), str) and round(x1Peaks[x]) in range(round(x3Peaks[x-1])-peakLeniency, round(x3Peaks[x-1])+peakLeniency):
+      print(" - - - - - ")
+      print("x1Peak:", x,"| Similiar peak in x3\n")
+      try:
+        print(x1Peaks[x], " ∼ ", round(x1Peaks[x]))
+      except:
+        print("NaN")
+      try:
+        print(x1Peaks[x-1], " ∼ ", round(x1Peaks[x-1]))
+      except:
+        print("NaN")
+      try:
+        print(x2Peaks[x-1], " ∼ ", round(x2Peaks[x-1]))
+      except:
+        print("NaN")
+      try:
+        print(x3Peaks[x-1], " ∼ ", round(x3Peaks[x-1]))
+      except:
+        print("NaN")
+      finally:
+        print(" - - - - - \n")
+    else:
+      print(" - - - - - ")
+      print("x1Peak:", x,"| Did not fit into any other peaks\n")
+      try:
+        print(x1Peaks[x], " ∼ ", round(x1Peaks[x]))
+      except:
+        print("NaN")
+      try:
+        print(x1Peaks[x-1], " ∼ ", round(x1Peaks[x-1]))
+      except:
+        print("NaN")
+      try:
+        print(x2Peaks[x-1], " ∼ ", round(x2Peaks[x-1]))
+      except:
+        print("NaN")
+      try:
+        print(x3Peaks[x-1], " ∼ ", round(x3Peaks[x-1]))
+      except:
+        print("NaN")
+      finally:
+        print(" - - - - - \n")
+#SORT ATTEMPT
+
+
+
+
+
 outputFileDetailed.close()
 outputFileTSV.close()
